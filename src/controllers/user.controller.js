@@ -25,10 +25,10 @@ const generateAccessAndRefreshTokens = async (userId) => {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { fullName, email, username, password, phone } = req.body;
+  const { fullName, email, shopname, password, phone, adhar, role } = req.body;
 
   if (
-    [fullName, email, username, password, phone].some(
+    [fullName, email, shopname, password, phone, adhar, role].some(
       (field) => field?.trim() === ""
     )
   ) {
@@ -36,14 +36,18 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const existedUser = await User.findOne({
-    $or: [{ username }, { email }, { phone }],
+    $or: [{ shopname }, { email }, { phone }, { adhar }],
   });
 
   if (existedUser) {
-    throw new ApiError(409, "User with email, username or phone already exists");
+    throw new ApiError(
+      409,
+      "User with email, username or phone already exists"
+    );
   }
 
   const avatarLocalPath = req.files?.avatar[0]?.path;
+  // console.log("avatarLocalPath", avatarLocalPath);
   let coverImageLocalPath;
   if (
     req.files &&
@@ -52,7 +56,7 @@ const registerUser = asyncHandler(async (req, res) => {
   ) {
     coverImageLocalPath = req.files.coverImage[0].path;
   }
-
+  // console.log("coverImageLocalPath", coverImageLocalPath);
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is required");
   }
@@ -61,7 +65,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
   if (!avatar) {
-    throw new ApiError(400, "Avatar file is required");
+    throw new ApiError(400, "Avatar  is required");
   }
 
   const user = await User.create({
@@ -70,8 +74,10 @@ const registerUser = asyncHandler(async (req, res) => {
     coverImage: coverImage?.url || "",
     email,
     password,
-    username: username.toLowerCase(),
+    shopname: shopname.toLowerCase(),
     phone,
+    adhar,
+    role,
   });
 
   const createdUser = await User.findById(user._id).select(
@@ -88,14 +94,14 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 const loginUser = asyncHandler(async (req, res) => {
-  const { email, username, password, phone } = req.body;
+  const { email, shopname, password, phone, adhar } = req.body;
 
-  if (!(username || email || phone)) {
-    throw new ApiError(400, "username, email or phone is required");
+  if (!(shopname || email || phone || adhar)) {
+    throw new ApiError(400, "shopname, email ,adhar or phone is required");
   }
 
   const user = await User.findOne({
-    $or: [{ username }, { email }, { phone }],
+    $or: [{ shopname }, { email }, { phone }, { adhar }, { adhar }],
   });
 
   if (!user) {
@@ -230,17 +236,21 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
+  // console.log("req.user", req.user);
   return res
     .status(200)
     .json(new ApiResponse(200, req.user, "User fetched successfully"));
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
-  const { fullName, email, phone } = req.body;
+  const { fullName, email, phone, shopname } = req.body;
 
-  if (!fullName || !email || !phone) {
+  if (!fullName || !email || !phone || !shopname) {
     throw new ApiError(400, "All fields are required");
   }
+  // if (fullName || email || phone) {
+  //   throw new ApiError(400, "At least one field is required to update");
+  // }
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
@@ -249,6 +259,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         fullName,
         email,
         phone,
+        shopname,
       },
     },
     { new: true }
@@ -322,7 +333,9 @@ const getUserProfile = asyncHandler(async (req, res) => {
     throw new ApiError(400, "username is missing");
   }
 
-  const user = await User.findOne({ username }).select("-password -refreshToken");
+  const user = await User.findOne({ username }).select(
+    "-password -refreshToken"
+  );
 
   if (!user) {
     throw new ApiError(404, "User does not exist");

@@ -1,11 +1,10 @@
 import { Router } from "express";
-import verifyJWT from "../middlewares/auth.middleware.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 const router = Router();
 
-router.use(verifyJWT)
+router.use(verifyJWT);
 
-
-//created by user 
+//created by user
 router.route("/createorder").post();
 //needed by both user and buyer
 router.route("/list").get();

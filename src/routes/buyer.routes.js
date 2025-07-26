@@ -1,4 +1,4 @@
-import { verifyJWT } from "../middlewares/auth.middleware";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { Router } from "express";
 
 const router = Router();

@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 
 const userSchema = new Schema(
   {
-    username: {
+    shopname: {
       type: String,
       required: true,
       unique: true,
@@ -13,8 +13,8 @@ const userSchema = new Schema(
       index: true,
     },
     role: {
-      type: Schema.Types.ObjectId,
-      ref: "Role",
+      type: String,
+      enum: ["SELLER", "BUYER"],
       required: true,
     },
     phone: {
@@ -36,6 +36,11 @@ const userSchema = new Schema(
       required: true,
       trim: true,
       index: true,
+    },
+    adhar: {
+      type: String,
+      required: true,
+      trim: true,
     },
     avatar: {
       type: String, // cloudinary url
