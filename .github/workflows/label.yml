@@ -1,0 +1,64 @@
+name: "Advanced Auto Labeling"
+
+on:
+  issues:
+    types: [opened, edited, reopened]
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  auto-label:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 'Apply labels based on title and body'
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: |
+            # Feature requests
+            ${{ contains(github.event.issue.title, 'feature') || contains(github.event.issue.body, 'feature') && 'feature' }}
+            ${{ contains(github.event.issue.title, 'enhancement') || contains(github.event.issue.body, 'enhancement') && 'enhancement' }}
+
+            # Bug reports
+            ${{ contains(github.event.issue.title, 'bug') || contains(github.event.issue.body, 'bug') && 'bug' }}
+            ${{ contains(github.event.issue.title, 'fix') || contains(github.event.issue.body, 'fix') && 'bug' }}
+
+            # Vendor-specific
+            ${{ contains(github.event.issue.body, 'vendor') && 'vendor' }}
+            ${{ contains(github.event.issue.body, 'food') && 'street-food' }}
+
+            # Digital Transformation
+            ${{ contains(github.event.issue.body, 'digital') && 'digital-transformation' }}
+            ${{ contains(github.event.issue.body, 'empower') && 'empowerment' }}
+
+      - name: 'Apply file-based labels for PRs'
+        if: github.event_name == 'pull_request'
+        uses: actions/labeler@v5
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          configuration-path: .github/labeler.yml
+
+      - name: 'Add contributor-based labels'
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: |
+            ${{ github.actor == 'morningstarxcdcode' && 'maintainer' }}
+            ${{ github.actor != 'morningstarxcdcode' && 'contributor' }}
+
+      - name: 'Add urgent label for critical issues'
+        if: contains(github.event.issue.title, 'urgent') || contains(github.event.issue.body, 'urgent') || contains(github.event.pull_request.title, 'urgent')
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: urgent
+
+# Create .github/labeler.yml with this content for file-based labeling
+# Example:
+# backend:
+#   - src/**
+# api:
+#   - routes/**
+# documentation:
+#   - docs/**
