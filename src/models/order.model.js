@@ -5,17 +5,17 @@ export const orderSchema = new Schema(
   {
     buyerId: {
       type: Schema.Types.ObjectId,
-      ref: "userModel",
+      ref: "User",
       required: true,
     },
     sellerId: {
       type: Schema.Types.ObjectId,
-      ref: "sellerModel",
+      ref: "Seller",
       required: true,
     },
     productId: {
       type: Schema.Types.ObjectId,
-      ref: "productModel",
+      ref: "Product",
       required: true,
     },
     isCancelled: {
@@ -34,6 +34,6 @@ export const orderSchema = new Schema(
   }
 );
 
-const orderModel = mongoose.model("orderModel", orderSchema);
+const Order = mongoose.model("Order", orderSchema);
 
 export default orderModel;

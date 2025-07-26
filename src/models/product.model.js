@@ -22,7 +22,7 @@ export const productSchema = new Schema(
     },
     sellerId: {
       type: Schema.Types.ObjectId,
-      ref: "sellerModel",
+      ref: "Seller",
       required: true,
     },
     category: {
@@ -42,6 +42,6 @@ export const productSchema = new Schema(
   }
 );
 
-const productModel = mongoose.model("productModel", productSchema);
+const Product = mongoose.model("Product", productSchema);
 
-export default productModel;
+export default Product;

@@ -31,7 +31,7 @@ const sellerSchema = new Schema(
     },
     role: {
       type: Schema.Types.ObjectId,
-      ref: "roleModel",
+      ref: "Role",
       required: true,
     },
     reviewcount: {
@@ -44,6 +44,6 @@ const sellerSchema = new Schema(
   }
 );
 
-const sellerModel = mongoose.model("sellerModel", sellerSchema);
+const Seller = mongoose.model("Seller", sellerSchema);
 
-export default sellerModel;
+export default Seller;
