@@ -43,10 +43,10 @@ Meet our incredible team of developers who made this project possible:
 
 ### 🎯 Core Developers
 
-| Avatar | Name | GitHub Profile | Role | Contributions |
-|--------|------|----------------|------|---------------|
-| <img src="https://avatars.githubusercontent.com/u/128579482?v=4" width="50" alt="Anurag"> | **Anurag** | [@a-nnurag](https://github.com/a-nnurag) | Lead Backend Developer | Backend architecture, models setup, database integration, core API development |
-| <img src="https://avatars.githubusercontent.com/u/205398826?v=4" width="50" alt="Sourav"> | **Sourav** | [@morningstarxcdcode](https://github.com/morningstarxcdcode) | Backend Developer | Controller implementations, API endpoints, code reviews |
+| Avatar                                                                                    | Name       | GitHub Profile                                               | Role                   | Contributions                                                                  |
+| ----------------------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------ | ---------------------- | ------------------------------------------------------------------------------ |
+| <img src="https://avatars.githubusercontent.com/u/128579482?v=4" width="50" alt="Anurag"> | **Anurag** | [@a-nnurag](https://github.com/a-nnurag)                     | Lead Backend Developer | Backend architecture, models setup, database integration, core API development |
+| <img src="https://avatars.githubusercontent.com/u/205398826?v=4" width="50" alt="Sourav"> | **Sourav** | [@morningstarxcdcode](https://github.com/morningstarxcdcode) | Backend Developer      | Controller implementations, API endpoints, code reviews                        |
 
 ## 📁 Project Structure
 
@@ -84,19 +84,22 @@ tutedudeHackathonBackend/
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/KillerCoders123456789/tutedudeHackathonBackend.git
    cd tutedudeHackathonBackend
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Environment Setup**
-   
+
    Create a `.env` file in the root directory:
+
    ```env
    PORT=8000
    MONGODB_URI=your_mongodb_connection_string
@@ -109,13 +112,15 @@ tutedudeHackathonBackend/
    ```
 
 4. **Database Setup**
-   
+
    Run the role seeder to initialize user roles:
+
    ```bash
    npm run seeder
    ```
 
 5. **Start the Development Server**
+
    ```bash
    npm run dev
    ```
@@ -130,21 +135,25 @@ tutedudeHackathonBackend/
 ## 📚 API Endpoints
 
 ### Authentication
+
 - `POST /api/user/register` - User registration
 - `POST /api/user/login` - User login
 - `POST /api/user/logout` - User logout
 
 ### User Management
+
 - `GET /api/user/profile` - Get user profile
 - `PUT /api/user/profile` - Update user profile
 
 ### Products (Coming Soon)
+
 - `GET /api/product` - Get all products
 - `POST /api/product` - Create new product
 - `PUT /api/product/:id` - Update product
 - `DELETE /api/product/:id` - Delete product
 
 ### Orders (Coming Soon)
+
 - `POST /api/order` - Create new order
 - `GET /api/order` - Get user orders
 - `PUT /api/order/:id` - Update order status
