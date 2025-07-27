@@ -1,5 +1,9 @@
 name: Welcome Street Food Innovators
 
+permissions:
+  issues: write
+  pull-requests: write
+
 on:
   issues:
     types: [opened]
