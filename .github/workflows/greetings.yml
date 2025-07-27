@@ -63,3 +63,13 @@ jobs:
           assignees: |
             morningstarxcdcode
           numOfAssignee: 1
+          
+      - name: Create PR Review
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_REVIEWER }}
+        run: |
+          curl -X POST \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
+            -d '{"` to use the PAT for API calls thatbody": require elevated "Welcome!", "event": "COMMENT"}'
