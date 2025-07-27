@@ -13,11 +13,7 @@ export const productSchema = new Schema(
       required: true,
     },
     price: {
-      type: [Number],
-      required: true,
-    },
-    category: {
-      type: String,
+      type: Number,
       required: true,
     },
     sellerId: {

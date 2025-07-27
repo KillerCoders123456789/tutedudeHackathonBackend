@@ -13,6 +13,9 @@ connectDB()
     });
   })
   .catch((err) => {
-    console.error("Database connection failed:", err);
-    process.exit(1);
+    console.error("Database connection failed:", err.message);
+    console.log("Starting server without database connection for testing...");
+    app.listen(process.env.PORT || 8000, () => {
+      console.log(`Server is running on port ${process.env.PORT || 8000} (without database)`);
+    });
   });
