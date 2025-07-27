@@ -14,7 +14,7 @@ export const reviewSchema = new Schema(
     },
     sellerId: {
       type: Schema.Types.ObjectId,
-      ref: "Seller",
+      ref: "User",
       required: true,
     },
     rating: {

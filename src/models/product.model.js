@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { Schema } from "mongoose";
-import productCategory from "../enums/product-enum.js";
+import {productCategory} from "../enums/product-enum.js";
 
 export const productSchema = new Schema(
   {
@@ -16,13 +16,9 @@ export const productSchema = new Schema(
       type: [Number],
       required: true,
     },
-    category: {
-      type: String,
-      required: true,
-    },
     sellerId: {
       type: Schema.Types.ObjectId,
-      ref: "Seller",
+      ref: "User",
       required: true,
     },
     category: {

@@ -1,14 +1,27 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import Seller from "../models/seller.model.js";
+import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
 
 const createSeller = asyncHandler(async (req, res) => {
-  const { shopName, ownerName, email, phone, address, role } = req.body;
+  const { shopName, ownerName, email, phone, address, role, adhar } = req.body;
 
-  if (!shopName || !ownerName || !email || !phone || !address || !role) {
+  if (
+    !shopName ||
+    !ownerName ||
+    !email ||
+    !phone ||
+    !address ||
+    !role ||
+    !adhar
+  ) {
     throw new ApiError(400, "All fields are required");
+  }
+
+  if (role !== "SELLER") {
+    throw new ApiError(400, "Invalid role");
   }
 
   if (!mongoose.Types.ObjectId.isValid(role)) {
@@ -47,18 +60,26 @@ const createSeller = asyncHandler(async (req, res) => {
 });
 
 const getAllSellers = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = req.query;
+  const {
+    page = 1,
+    limit = 10,
+    sortBy = "createdAt",
+    sortOrder = "desc",
+  } = req.query;
 
   const sortOptions = {};
   sortOptions[sortBy] = sortOrder === "asc" ? 1 : -1;
 
-  const sellers = await Seller.find()
+  const sellers = await User.find({ role: "SELLER" })
     .populate("role", "name")
     .sort(sortOptions)
     .limit(limit * 1)
-    .skip((page - 1) * limit);
+    .skip((page - 1) * limit)
+    .select("-password -refreshToken");
 
-  const totalSellers = await Seller.countDocuments();
+  
+
+  const totalSellers = await User.countDocuments({role:"SELLER"});
 
   return res.status(200).json(
     new ApiResponse(
@@ -75,13 +96,13 @@ const getAllSellers = asyncHandler(async (req, res) => {
 });
 
 const getSellerById = asyncHandler(async (req, res) => {
-  const { sellerId } = req.params;
+  const { id } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(sellerId)) {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new ApiError(400, "Invalid seller ID");
   }
-
-  const seller = await Seller.findById(sellerId).populate("role", "name");
+  // console.log("Seller ID:", id);
+  const seller = await User.findById(id).populate("role", "name");
 
   if (!seller) {
     throw new ApiError(404, "Seller not found");
@@ -93,28 +114,25 @@ const getSellerById = asyncHandler(async (req, res) => {
 });
 
 const updateSeller = asyncHandler(async (req, res) => {
-  const { sellerId } = req.params;
-  const { shopName, ownerName, email, phone, address } = req.body;
+  const { id } = req.params;
+  const { shopname, fullName, email, phone, address } = req.body;
 
-  if (!mongoose.Types.ObjectId.isValid(sellerId)) {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new ApiError(400, "Invalid seller ID");
   }
 
   const updateFields = {};
-  if (shopName) updateFields.shopName = shopName;
-  if (ownerName) updateFields.ownerName = ownerName;
+  if (shopname) updateFields.shopname = shopname;
+  if (fullName) updateFields.fullName = fullName;
   if (email) updateFields.email = email;
   if (phone) updateFields.phone = phone;
   if (address) updateFields.address = address;
 
   // Check if email or phone already exists for other sellers
   if (email || phone) {
-    const existingSeller = await Seller.findOne({
-      _id: { $ne: sellerId },
-      $or: [
-        ...(email ? [{ email }] : []),
-        ...(phone ? [{ phone }] : []),
-      ],
+    const existingSeller = await User.findOne({
+      _id: { $ne: id },
+      $or: [...(email ? [{ email }] : []), ...(phone ? [{ phone }] : [])],
     });
 
     if (existingSeller) {
@@ -122,8 +140,8 @@ const updateSeller = asyncHandler(async (req, res) => {
     }
   }
 
-  const seller = await Seller.findByIdAndUpdate(
-    sellerId,
+  const seller = await User.findByIdAndUpdate(
+    id,
     { $set: updateFields },
     { new: true, runValidators: true }
   ).populate("role", "name");
@@ -164,8 +182,8 @@ const searchSellers = asyncHandler(async (req, res) => {
 
   const filter = {
     $or: [
-      { shopName: { $regex: query, $options: "i" } },
-      { ownerName: { $regex: query, $options: "i" } },
+      { shopname: { $regex: query, $options: "i" } },
+      { fullName: { $regex: query, $options: "i" } },
       { email: { $regex: query, $options: "i" } },
     ],
   };
@@ -215,7 +233,9 @@ const updateSellerReviewCount = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, seller, "Seller review count updated successfully"));
+    .json(
+      new ApiResponse(200, seller, "Seller review count updated successfully")
+    );
 });
 
 const getSellerStats = asyncHandler(async (req, res) => {

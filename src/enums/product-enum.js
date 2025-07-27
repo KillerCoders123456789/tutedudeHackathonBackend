@@ -1,5 +1,6 @@
 export const productCategory = {
   VEGGIES: "VEGGIES",
+  MOMO:"MOMO",
   FRUITS: "FRUITS",
   WATER: "WATER",
   DAIRY: "DAIRY",

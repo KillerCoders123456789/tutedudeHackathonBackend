@@ -8,29 +8,29 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
 
 const getBuyerProfile = asyncHandler(async (req, res) => {
-  const { buyerId } = req.params;
+  const { id } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(buyerId)) {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new ApiError(400, "Invalid buyer ID");
   }
 
-  const buyer = await User.findById(buyerId).select("-password -refreshToken");
+  const buyer = await User.findById(id).select("-password -refreshToken");
 
   if (!buyer) {
     throw new ApiError(404, "Buyer not found");
   }
 
   // Get buyer statistics
-  const totalOrders = await Order.countDocuments({ buyerId });
+  const totalOrders = await Order.countDocuments({ buyerId:id });
   const deliveredOrders = await Order.countDocuments({ 
-    buyerId, 
+    buyerId:id, 
     isDelivered: true 
   });
   const cancelledOrders = await Order.countDocuments({ 
-    buyerId, 
+    buyerId:id, 
     isCancelled: true 
   });
-  const totalReviews = await Review.countDocuments({ buyerId });
+  const totalReviews = await Review.countDocuments({ buyerId:id });
 
   const buyerProfile = {
     ...buyer.toObject(),
@@ -48,7 +48,7 @@ const getBuyerProfile = asyncHandler(async (req, res) => {
 });
 
 const getBuyerOrders = asyncHandler(async (req, res) => {
-  const { buyerId } = req.params;
+  const { id } = req.params;
   const { 
     page = 1, 
     limit = 10, 
@@ -57,11 +57,11 @@ const getBuyerOrders = asyncHandler(async (req, res) => {
     sortOrder = "desc" 
   } = req.query;
 
-  if (!mongoose.Types.ObjectId.isValid(buyerId)) {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new ApiError(400, "Invalid buyer ID");
   }
 
-  const filter = { buyerId };
+  const filter = { buyerId: id };
   if (status === "cancelled") filter.isCancelled = true;
   if (status === "delivered") filter.isDelivered = true;
   if (status === "pending") {
@@ -96,7 +96,7 @@ const getBuyerOrders = asyncHandler(async (req, res) => {
 });
 
 const getBuyerReviews = asyncHandler(async (req, res) => {
-  const { buyerId } = req.params;
+  const { id } = req.params;
   const { 
     page = 1, 
     limit = 10, 
@@ -104,7 +104,7 @@ const getBuyerReviews = asyncHandler(async (req, res) => {
     sortOrder = "desc" 
   } = req.query;
 
-  if (!mongoose.Types.ObjectId.isValid(buyerId)) {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new ApiError(400, "Invalid buyer ID");
   }
 
@@ -118,7 +118,7 @@ const getBuyerReviews = asyncHandler(async (req, res) => {
     .limit(limit * 1)
     .skip((page - 1) * limit);
 
-  const totalReviews = await Review.countDocuments({ buyerId });
+  const totalReviews = await Review.countDocuments({ buyerId: id });
 
   return res.status(200).json(
     new ApiResponse(

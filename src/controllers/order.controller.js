@@ -6,10 +6,14 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
 
 const createOrder = asyncHandler(async (req, res) => {
-  const { buyerId, sellerId, productId } = req.body;
+  const { sellerId, productId, amount } = req.body;
 
-  if (!buyerId || !sellerId || !productId) {
-    throw new ApiError(400, "Buyer ID, Seller ID, and Product ID are required");
+  const buyerId = req.user.id;
+  if (!buyerId || !sellerId || !productId || !amount) {
+    throw new ApiError(
+      400,
+      "Buyer ID, Seller ID, Product ID, and Amount are required"
+    );
   }
 
   if (
@@ -26,7 +30,7 @@ const createOrder = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Product not found");
   }
 
-  if (product.amountLeft <= 0) {
+  if (product.amountLeft - amount < 0) {
     throw new ApiError(400, "Product is out of stock");
   }
 
@@ -34,6 +38,7 @@ const createOrder = asyncHandler(async (req, res) => {
     buyerId,
     sellerId,
     productId,
+    amount,
   });
 
   if (!order) {
@@ -43,13 +48,13 @@ const createOrder = asyncHandler(async (req, res) => {
   // Decrease product stock
   await Product.findByIdAndUpdate(
     productId,
-    { $inc: { amountLeft: -1 } },
+    { $inc: { amountLeft: -amount } },
     { new: true }
   );
 
   const createdOrder = await Order.findById(order._id)
     .populate("buyerId", "fullName email phone")
-    .populate("sellerId", "shopName ownerName email phone")
+    .populate("sellerId", "shopName ownerName email address")
     .populate("productId", "name description price category");
 
   return res
@@ -58,7 +63,12 @@ const createOrder = asyncHandler(async (req, res) => {
 });
 
 const getAllOrders = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = req.query;
+  const {
+    page = 1,
+    limit = 10,
+    sortBy = "createdAt",
+    sortOrder = "desc",
+  } = req.query;
 
   const sortOptions = {};
   sortOptions[sortBy] = sortOrder === "asc" ? 1 : -1;
@@ -148,19 +158,24 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
 });
 
 const cancelOrder = asyncHandler(async (req, res) => {
-  const { orderId } = req.params;
+  const { id } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new ApiError(400, "Invalid order ID");
   }
 
-  const order = await Order.findById(orderId);
+  let order;
+  if (req.user.role === "BUYER") {
+    order = await Order.findOne({ _id: id, buyerId: req.user.id });
+  } else {
+    order = await Order.findOne({ _id: id, sellerId: req.user.id });
+  }
 
   if (!order) {
     throw new ApiError(404, "Order not found");
   }
 
-  if (order.isCancelled) {
+  if (order.isDeprecated) {
     throw new ApiError(400, "Order is already cancelled");
   }
 
@@ -169,8 +184,8 @@ const cancelOrder = asyncHandler(async (req, res) => {
   }
 
   const updatedOrder = await Order.findByIdAndUpdate(
-    orderId,
-    { $set: { isCancelled: true } },
+    id,
+    { $set: { isDeprecated: true } },
     { new: true }
   )
     .populate("buyerId", "fullName email phone")
@@ -180,7 +195,7 @@ const cancelOrder = asyncHandler(async (req, res) => {
   // Increase product stock back
   await Product.findByIdAndUpdate(
     order.productId,
-    { $inc: { amountLeft: 1 } },
+    { $inc: { amountLeft: order.amount } },
     { new: true }
   );
 
@@ -190,13 +205,19 @@ const cancelOrder = asyncHandler(async (req, res) => {
 });
 
 const markOrderAsDelivered = asyncHandler(async (req, res) => {
-  const { orderId } = req.params;
+  const { id } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new ApiError(400, "Invalid order ID");
   }
+  if (req.user.role !== "SELLER") {
+    throw new ApiError(403, "Only sellers can mark orders as delivered");
+  }
+  const order = await Order.findById(id);
 
-  const order = await Order.findById(orderId);
+  if (order.sellerId.toString() !== req.user.id) {
+    throw new ApiError(403, "You are not authorized to deliver this order");
+  }
 
   if (!order) {
     throw new ApiError(404, "Order not found");
@@ -211,7 +232,7 @@ const markOrderAsDelivered = asyncHandler(async (req, res) => {
   }
 
   const updatedOrder = await Order.findByIdAndUpdate(
-    orderId,
+    id,
     { $set: { isDelivered: true } },
     { new: true }
   )
@@ -221,7 +242,13 @@ const markOrderAsDelivered = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, updatedOrder, "Order marked as delivered successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        updatedOrder,
+        "Order marked as delivered successfully"
+      )
+    );
 });
 
 const getOrdersByBuyer = asyncHandler(async (req, res) => {
@@ -264,14 +291,18 @@ const getOrdersByBuyer = asyncHandler(async (req, res) => {
 });
 
 const getOrdersBySeller = asyncHandler(async (req, res) => {
-  const { sellerId } = req.params;
+  const id = req.user._id;
   const { page = 1, limit = 10, status } = req.query;
 
-  if (!mongoose.Types.ObjectId.isValid(sellerId)) {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new ApiError(400, "Invalid seller ID");
   }
 
-  const filter = { sellerId };
+  if (req.user.role !== "SELLER") {
+    throw new ApiError(403, "Only sellers can view their orders");
+  }
+
+  const filter = { sellerId: id };
   if (status === "cancelled") filter.isCancelled = true;
   if (status === "delivered") filter.isDelivered = true;
   if (status === "pending") {

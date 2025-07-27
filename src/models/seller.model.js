@@ -24,14 +24,14 @@ const sellerSchema = new Schema(
       unique: true,
       trim: true,
     },
-    address: {
+    adhar: {
       type: String,
       required: true,
       trim: true,
     },
     role: {
-      type: Schema.Types.ObjectId,
-      ref: "Role",
+      type: String,
+      enum: ["SELLER", "BUYER"],
       required: true,
     },
     reviewcount: {

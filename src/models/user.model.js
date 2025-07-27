@@ -6,11 +6,9 @@ const userSchema = new Schema(
   {
     shopname: {
       type: String,
-      required: true,
-      unique: true,
+      required: false,
       lowercase: true,
       trim: true,
-      index: true,
     },
     role: {
       type: String,
@@ -55,6 +53,13 @@ const userSchema = new Schema(
     },
     refreshToken: {
       type: String,
+    },
+    address: {
+      type: String,
+      required: function () {
+        return this.role === "SELLER";
+      },
+      trim: true,
     },
   },
   {

@@ -25,15 +25,20 @@ const generateAccessAndRefreshTokens = async (userId) => {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { fullName, email, shopname, password, phone, adhar, role } = req.body;
+  const { fullName, email, shopname, password, phone, adhar, role, address } =
+    req.body;
 
   if (
-    [fullName, email, shopname, password, phone, adhar, role].some(
+    [fullName, email, shopname, password, phone, adhar, role, address].some(
       (field) => field?.trim() === ""
     )
   ) {
     throw new ApiError(400, "All fields are required");
   }
+
+  // if (role !== "BUYER") {
+  //   throw new ApiError(400, "Invalid role");
+  // }
 
   const existedUser = await User.findOne({
     $or: [{ shopname }, { email }, { phone }, { adhar }],
@@ -77,6 +82,7 @@ const registerUser = asyncHandler(async (req, res) => {
     shopname: shopname.toLowerCase(),
     phone,
     adhar,
+    address,
     role,
   });
 
@@ -94,14 +100,14 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 const loginUser = asyncHandler(async (req, res) => {
-  const { email, shopname, password, phone, adhar } = req.body;
+  const { email, password, phone, adhar } = req.body;
 
-  if (!(shopname || email || phone || adhar)) {
-    throw new ApiError(400, "shopname, email ,adhar or phone is required");
+  if (!(email || phone || adhar)) {
+    throw new ApiError(400, "email, adhar or phone is required");
   }
 
   const user = await User.findOne({
-    $or: [{ shopname }, { email }, { phone }, { adhar }, { adhar }],
+    $or: [{ email }, { phone }, { adhar }, { adhar }],
   });
 
   if (!user) {
@@ -243,14 +249,18 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
-  const { fullName, email, phone, shopname } = req.body;
+  let { fullName, email, phone, shopname } = req.body;
 
-  if (!fullName || !email || !phone || !shopname) {
-    throw new ApiError(400, "All fields are required");
+  if (!(fullName || email || phone || shopname)) {
+    throw new ApiError(400, "atleast one field is required");
   }
   // if (fullName || email || phone) {
   //   throw new ApiError(400, "At least one field is required to update");
   // }
+  if (!fullName) fullName = req.user.fullName;
+  if (!email) email = req.user.email;
+  if (!phone) phone = req.user.phone;
+  if (!shopname) shopname = req.user.shopname;
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,

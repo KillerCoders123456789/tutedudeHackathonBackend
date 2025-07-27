@@ -1,4 +1,3 @@
-import { isCancel } from "axios";
 import mongoose, { Schema } from "mongoose";
 
 export const orderSchema = new Schema(
@@ -10,7 +9,7 @@ export const orderSchema = new Schema(
     },
     sellerId: {
       type: Schema.Types.ObjectId,
-      ref: "Seller",
+      ref: "User",
       required: true,
     },
     productId: {
@@ -18,13 +17,17 @@ export const orderSchema = new Schema(
       ref: "Product",
       required: true,
     },
-    isCancelled: {
+    isDeprecated: {
       type: Boolean,
       default: false,
     },
     isDelivered: {
       type: Boolean,
       default: false,
+    },
+    amount: {
+      type: Number,
+      required: true,
     },
     createdAt: { type: Date, default: null },
     updatedAt: { type: Date, default: null },
@@ -36,4 +39,4 @@ export const orderSchema = new Schema(
 
 const Order = mongoose.model("Order", orderSchema);
 
-export default orderModel;
+export default Order;
