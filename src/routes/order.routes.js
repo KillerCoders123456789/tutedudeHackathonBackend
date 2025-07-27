@@ -1,16 +1,27 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import {
+  createOrder,
+  getAllOrders,
+  getOrderById,
+  updateOrderStatus,
+  cancelOrder,
+  markOrderAsDelivered,
+  getOrdersByBuyer,
+  getOrdersBySeller,
+  getOrderStats,
+} from "../controllers/order.controller.js";
+
 const router = Router();
 
 router.use(verifyJWT);
 
-//created by user
-router.route("/createorder").post();
-//needed by both user and buyer
-router.route("/list").get();
-//needed by both user and buyer
-router.route("/details/:id/").get();
-//needed by both user(if it want to cancel) and buyer(if it want to finalize)
-router.route("/update/:id").put();
+router.route("/").get(getAllOrders).post(createOrder);
+router.route("/stats").get(getOrderStats);
+router.route("/:orderId").get(getOrderById).put(updateOrderStatus);
+router.route("/:orderId/cancel").put(cancelOrder);
+router.route("/:orderId/deliver").put(markOrderAsDelivered);
+router.route("/buyer/:buyerId").get(getOrdersByBuyer);
+router.route("/seller/:sellerId").get(getOrdersBySeller);
 
 export default router;

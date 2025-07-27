@@ -10,15 +10,18 @@ const connectDB = async () => {
   console.log("MONGODB_URI", process.env.MONGODB_URI);
   try {
     const connectionInstance = await mongoose.connect(
-      process.env.MONGODB_URI + "/" + DB_NAME
+      process.env.MONGODB_URI + "/" + DB_NAME,
+      {
+        serverSelectionTimeoutMS: 3000, // Timeout after 3s instead of 30s
+        connectTimeoutMS: 3000,
+      }
     );
     console.log(
       `Successfully connected to db ${DB_NAME} at host ${connectionInstance.connection.host}`
     );
   } catch (error) {
-    console.log("Error in connecting to DB", error);
-    process.exit(1); // 1 is a generic error code
-    // 0 is a success code
+    console.log("Error in connecting to DB", error.message);
+    throw error;
   }
 };
 export { connectDB };

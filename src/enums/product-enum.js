@@ -1,4 +1,4 @@
-export const productCategory = {
+const productCategory = {
   VEGGIES: "VEGGIES",
   FRUITS: "FRUITS",
   WATER: "WATER",
@@ -13,3 +13,5 @@ export const productCategory = {
   SWEETS: "SWEETS",
   MISC: "MISCILLENIOUS",
 };
+
+export default productCategory;
