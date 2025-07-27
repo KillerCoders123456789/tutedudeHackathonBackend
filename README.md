@@ -25,25 +25,6 @@ This repository contains the backend codebase developed for the **TuteDude Hacka
 
 ---
 
-## 📁 Folder Structure
-
-```
-tutedudeHackathonBackend/
-├── config/               # DB & env configs
-├── controllers/          # Business logic
-├── middleware/           # Auth & error handling
-├── models/               # MongoDB schemas
-├── routes/               # Route definitions
-├── utils/                # Helper functions
-├── .env                  # Environment variables
-├── .gitignore            # Ignored files
-├── package.json          # Dependencies
-├── README.md             # Project overview
-└── server.js             # App entry point
-```
-
----
-
 ## 📦 Installation
 
 1. **Clone the repo**
@@ -91,7 +72,7 @@ Use tools like **Postman** or **Insomnia** to test APIs.
 
 ## 🙏 Acknowledgements
 
-This backend was developed as part of a team project during the TuteDude Hackathon 2024.
+This backend was developed as part of a team project during the TuteDude Hackathon 2025.
 
 ---
 
