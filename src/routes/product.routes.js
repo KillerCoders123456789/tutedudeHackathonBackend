@@ -1,13 +1,25 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import {
+  createProduct,
+  getAllProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct,
+  searchProducts,
+} from "../controllers/product.controller.js";
 
 const router = Router();
 
-router.use(verifyJWT);
+// Public routes
+router.route("/").get(getAllProducts);
+router.route("/search").get(searchProducts);
+router.route("/:productId").get(getProductById);
 
-router.route("/profile/:id").get();
-router.route("/update/:id").put();
-router.route("/listitem").get();
-router.route("/createitem").post();
+// Protected routes
+router.use(verifyJWT);
+router.route("/").post(createProduct);
+router.route("/:productId").put(updateProduct);
+router.route("/:productId").delete(deleteProduct);
 
 export default router;

@@ -1,4 +1,3 @@
-import { isCancel } from "axios";
 import mongoose, { Schema } from "mongoose";
 
 export const orderSchema = new Schema(
@@ -36,4 +35,4 @@ export const orderSchema = new Schema(
 
 const Order = mongoose.model("Order", orderSchema);
 
-export default orderModel;
+export default Order;
