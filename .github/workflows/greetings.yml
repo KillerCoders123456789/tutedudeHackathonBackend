@@ -6,6 +6,10 @@ on:
   pull_request_target:
     types: [opened]
 
+permissions:
+  issues: write
+  pull-requests: write
+
 jobs:
   greet:
     runs-on: ubuntu-latest
@@ -16,21 +20,14 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           issue-message: |
             🌟 Hello @${{ github.actor }}!
-            
             Welcome to the Digital Transformation & Empowerment of Street Food Vendors project! 🍲🚀
-            
             Thank you for opening your first issue. Your input helps us empower street food vendors with technology, driving positive social impact.  
-            
             👉 Please share your ideas, questions, or suggestions. Check out our [Contribution Guide](CONTRIBUTING.md) to get started.
-            
             Together, let's make street food smarter, safer, and more successful!
           pr-message: |
             🎉 Cheers @${{ github.actor }}!
-            
-            You just made your first pull request to a project dedicated to bringing digital innovation to street food vendors. Your code helps improve the lives and businesses of vendors everywhere. 🙌
-            
+            You just made your first pull request to a project dedicated to bringing digital innovation to street food vendors. Your code helps improve the lives and businesses of vendors everywhere!
             Please ensure your PR aligns with our [contribution guidelines](CONTRIBUTING.md). If you want a project mentor, mention `@morningstarxcdcode` in a comment and we’ll reach out!
-            
             🌍 Let’s build tech solutions that make a difference on the streets.
 
       - name: Label First-Time PRs for Street Food Impact
